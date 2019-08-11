@@ -1,5 +1,15 @@
 const queries = require('../../db/queries.js');
 
+const getHistoryStudents = async (req, res) => {
+  let result = await queries.getHistoryStudents();
+  res.status(200).json({ data: result });
+}
+
+const getHistoryStudentsFiltered = async (req, res) => {
+  let result = await queries.getHistoryStudentsFiltered(req.filterObj);
+  res.status(200).json({ data: result });
+}
+
 const getStudents = async (req, res) => {
   let result = await queries.getStudents(req.intecId);
   res.status(200).json({ data: result });
@@ -18,5 +28,7 @@ const getStudentInCurrentTrimester = async (req, res) => {
 module.exports = {
   getStudents,
   addStudent,
-  getStudentInCurrentTrimester
+  getStudentInCurrentTrimester,
+  getHistoryStudents,
+  getHistoryStudentsFiltered
 }
