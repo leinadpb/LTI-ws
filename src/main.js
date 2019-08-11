@@ -63,7 +63,7 @@ app.use((req, res, next) => {
   }
 });
 
-// Routers
+// Routers - will be all protected
 app.use('/api/v1/user', UserRouter);
 app.use('/api/v1/auth', AuthRouter);
 app.use('/api/v1/students', StudentRouter);

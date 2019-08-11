@@ -6,7 +6,7 @@ const getSubjects = async (req, res) => {
 }
 
 const addSubjects = async (req, res) => {
-  let result = await queries.addSubjects(req.subjects);
+  let result = await queries.addSubjects(req.body.subjects);
   res.status(200).json({ data: result });
 }
 

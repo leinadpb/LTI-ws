@@ -6,12 +6,12 @@ const getConfigs = async (req, res) => {
 }
 
 const updateConfig = async (req, res) => {
-  let result = await queries.updateConfig(req.config);
+  let result = await queries.updateConfig(req.body.config);
   res.status(200).json({ data: result });
 }
 
 const updatePreferences = async (req, res) => {
-  let result = await queries.updatePreferences(req.preferences);
+  let result = await queries.updatePreferences(req.body.preferences);
   res.status(200).json({ data: result });
 }
 

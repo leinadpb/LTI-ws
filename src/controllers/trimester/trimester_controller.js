@@ -6,12 +6,12 @@ const getTrimesters = async (req, res) => {
 }
 
 const updateTrimester = async (req, res) => {
-  let result = await queries.updateTrimester(req.trimester);
+  let result = await queries.updateTrimester(req.body.trimester);
   res.status(200).json({ data: result });
 }
 
 const addTrimester = async (req, res) => {
-  let result = await queries.addTrimester(req.trimester);
+  let result = await queries.addTrimester(req.body.trimester);
   res.status(200).json({ data: result });
 }
 
