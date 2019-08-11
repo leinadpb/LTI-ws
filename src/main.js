@@ -31,6 +31,9 @@ const PUBLIC_ROUTES = ['/api/v1/auth/signin'];
 app.use(require('body-parser').json());
 app.use((req, res, next) => {
   console.log('DEBUG >>>> ', req.path);
+  console.log('DEBUG >>> ', req.body);
+  console.log('DEBUG >>> ', req.query);
+  console.log('BEDUB >>> auth token >>> ', req.headers.authorization);
   if (PUBLIC_ROUTES.includes(req.path)) {
     next();
   } else {
@@ -64,7 +67,7 @@ app.use((req, res, next) => {
 });
 
 // Routers - will be all protected
-app.use('/api/v1/user', UserRouter);
+app.use('/api/v1/users', UserRouter);
 app.use('/api/v1/auth', AuthRouter);
 app.use('/api/v1/students', StudentRouter);
 app.use('/api/v1/configs', ConfigRouter);
@@ -73,7 +76,7 @@ app.use('/api/v1/trimesters', TrimesterRouter);
 app.use('/api/v1/teachers', TeacherRouter);
 app.use('/api/v1/blacklist', BlacklistRotuer);
 app.use('/api/v1/subjects', SubjectRouter);
-app.use('api/v1/common', CommonRouter);
+app.use('/api/v1/common', CommonRouter);
 
 let appPort = !!process.env.PORT ? process.env.PORT : 8700;
 app.listen(appPort, () =>
