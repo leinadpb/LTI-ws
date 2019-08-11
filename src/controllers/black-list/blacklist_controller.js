@@ -16,6 +16,7 @@ const deleteBlackListUser = async (req, res) => {
 }
 
 const updateBlackListUser = async (req, res) => {
+  console.log('edit >', req.body.user);
   let result = await queries.updateBlackListUser(req.body.user);
   res.status(200).json({ data: result });
 }

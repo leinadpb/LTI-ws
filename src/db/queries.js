@@ -8,6 +8,10 @@ const SubjectModel = require('../models/subject');
 const AppUserModel = require('../models/app_user');
 const mongoose = require('mongoose');
 
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
 // CONFIGS
 const getConfigs = () => {
   return ConfigModel.find({}, (err, docs) => {
@@ -317,7 +321,7 @@ const addBlackListUser = (user) => {
   });
 }
 const deleteBlackListUser = (user) => {
-  return BlackListModel.findOneAndDelete({_id: mongoose.Types.ObjectId(user.mongoId.id)}, (err) => {
+  return BlackListModel.findOneAndDelete({_id: mongoose.Types.ObjectId(user.mongoId)}, (err) => {
     if (!!err) {
       console.log('Error deleting admin: ', err);
       return null;
@@ -325,11 +329,12 @@ const deleteBlackListUser = (user) => {
   });
 }
 const updateBlackListUser = (user) => {
-  return BlackListModel.findOneAndUpdate({_id: mongoose.Types.ObjectId(user.mongoId.id)}, user, (err) => {
+  return BlackListModel.findOneAndUpdate({_id: mongoose.Types.ObjectId(user.mongoId)}, {fullName: user.fullName, domain: user.domain, intecId: user.intecId}, (err) => {
     if (!!err) {
       console.log('Error updating admin: ', err);
       return null;
     }
+    console.log('u')
   });
 }
 
