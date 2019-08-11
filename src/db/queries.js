@@ -5,6 +5,7 @@ const HistoryStudentModel = require('../models/historyStudent');
 const HistoryTeacherModel = require('../models/historyTecher');
 const BlackListModel = require('../models/blackList');
 const SubjectModel = require('../models/subject');
+const AppUserModel = require('../models/app_user');
 const mongoose = require('mongoose');
 
 // CONFIGS
@@ -287,6 +288,16 @@ const getUser = (intecId, domain) => {
   }
 }
 
+const getAppUser = (email) => {
+  return AppUserModel.findOne({email: email}, (err, doc) => {
+    if (!!err) {
+      console.log('Error getting applciation user with email: ', email, ' Error: ', err);
+      return;
+    }
+    return doc;
+  }).lean()
+}
+
 // BlackList
 const getBlackListUsers = () => {
   return BlackListModel.find({}, (err, docs) => {
@@ -379,5 +390,6 @@ module.exports = {
   addTrimester,
   updatePreferences,
   addSubjects,
-  removeAllSubjects
+  removeAllSubjects,
+  getAppUser
 }

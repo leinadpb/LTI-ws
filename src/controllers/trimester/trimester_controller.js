@@ -22,7 +22,6 @@ const getCurrentTrimester = async (req, res) => {
 
 module.exports = {
   getTrimesters,
-  determineTrimesterCustomId,
   updateTrimester,
   addTrimester,
   getCurrentTrimester
