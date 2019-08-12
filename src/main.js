@@ -79,6 +79,6 @@ app.use('/api/v1/subjects', SubjectRouter);
 app.use('/api/v1/common', CommonRouter);
 
 let appPort = !!process.env.PORT ? process.env.PORT : 8700;
-app.listen(appPort, () =>
+app.listen(appPort, '0.0.0.0', () =>
   console.log(`App started at port: ${appPort}`)
 );
