@@ -87,24 +87,25 @@ const rules = [
   },
 ];
 
+// Month starts from zero in Dates...
 const trimesters = [
   {
-    start: new Date(2019, 5, 1),
-    ends: new Date(2019, 7, 12),
+    start: new Date(2019, 4, 1),
+    ends: new Date(2019, 6, 12),
     name: 'Mayo - Julio 2019',
     lastModified: undefined,
     customId: 'M-J-2019'
   },
   {
-    start: new Date(2019, 8, 1),
-    ends: new Date(2019, 10, 24),
+    start: new Date(2019, 7, 1),
+    ends: new Date(2019, 9, 24),
     name: 'Agosto - Octubre 2019',
     lastModified: undefined,
     customId: 'A-O-2019'
   },
   {
-    start: new Date(2019, 11, 1),
-    ends: new Date(2020, 1, 18),
+    start: new Date(2019, 10, 1),
+    ends: new Date(2020, 0, 18),
     name: 'Noviembre - Enero 2020',
     lastModified: undefined,
     customId: 'N-E-2020'
