@@ -170,7 +170,24 @@ const getHistoryStudents = () => {
   }).lean();
 }
 const getHistoryStudentsFiltered = (filterObject) => {
-  return HistoryStudentModel.find(!!filterObject ? filterObject : {}, (err, docs) => {
+  let filter = {};
+  if (filterObject.teacher) {
+    filter = {...filter, "teacher": { "$regex": filterObject.teacher, "$options": "i" } }
+  }
+  if (filterObject.trimesterName) {
+    filter = {...filter, "trimesterName": { "$regex": filterObject.trimesterName, "$options": "i" } }
+  }
+  if (filterObject.subject) {
+    filter = {...filter, "subject": { "$regex": filterObject.subject, "$options": "i" } }
+  }
+  if (filterObject.trimesterId) {
+    filter = {...filter, "trimesterId": filterObject.trimesterId }
+  }
+  if (filterObject.intecId) {
+    filter = {...filter, "intecId": { "$regex": filterObject.intecId, "$options": "i" } } 
+  }
+  console.log(filter);
+  return HistoryStudentModel.find(filter, (err, docs) => {
     if (!!err) {
       console.log('Error retreiving student: ', err);
       return null;
@@ -178,6 +195,7 @@ const getHistoryStudentsFiltered = (filterObject) => {
     return docs;
   }).lean();
 }
+
 const getStudents = (intecId) => {
   return HistoryStudentModel.find({}, (err, docs) => {
     if (!!err) {

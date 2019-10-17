@@ -6,14 +6,6 @@ require('dotenv').config();
 const baseURL = 'https://procesos.intec.edu.do';
 const ofertaURL = 'https://procesos.intec.edu.do/OfertaAcademica/Index';
 
-function doActionDelayed () {
-  return new Promise(function (resolve, reject) {
-    setTimeout(function () {
-      resolve("anything");
-    }, 5000);
-  });
-}
-
 const start = async () => {
   try {
     const browser = await puppeteer.launch({
@@ -21,11 +13,15 @@ const start = async () => {
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--no-first-run',
+        '--no-zygote',
       ],
     });
     const page = await browser.newPage();
     await page.goto(baseURL);
-    await page.waitForSelector('#txtID', { timeout: 5000 });
+    await page.waitForSelector('#txtID', { timeout: 20000 });
 
     const body = await page.evaluate((user, password) => {
       document.querySelector('#txtID').value = user;
@@ -37,7 +33,7 @@ const start = async () => {
     return new Promise((resolve, reject) => {
       setTimeout(async () => {
         await page.goto(ofertaURL);
-        await page.waitForSelector('#content-oferta', { timeout: 5000 });
+        await page.waitForSelector('#content-oferta', { timeout: 20000 });
   
         const ofertaAcademica = await page.evaluate(() => {
           const areas = 5;
@@ -65,10 +61,10 @@ const start = async () => {
                   let row = rows[j].children;
                   
                   let rowResult = {
-                    type: row[0].innerText, // type
-                    section: row[1].innerText, // seciton
-                    room: row[2].innerText, // room
-                    teacher: row[3].innerText
+                    type: row[0].innerText.trim(), // type
+                    section: row[1].innerText.trim(), // seciton
+                    room: row[2].innerText.trim(), // room
+                    teacher: row[3].innerText.replace(/\s+/g, " ").trim()
                   }
                   // GET SUBJECTS ONLY BEING IMPARTED IN THE FD4xx (wichc corresponds to the LABTI - INTEC)
                   if(!!row[2].innerText && row[2].innerText.toString().toLowerCase().substr(0, 3) === "fd4") {
@@ -92,10 +88,19 @@ const start = async () => {
         console.log('Primary data >>', ofertaAcademica);
         // Save ofertaAcademica in MongoDB
         let updatedSubjects = ofertaAcademica.map(s => {
-          let teacherList = s.teachers.join('');
+
+          console.log(s.teachers);
+          teacherList = s.teachers;
+          if (s.teachers.length > 1) {
+            teacherList = s.teachers.join(';');
+          } else if (s.teachers.length === 1) {
+            teacherList = s.teachers[0];
+          } else {
+            return;
+          }
   
           if (teacherList.replace(/\s/g, "") == "") {
-            teacherList = "NO ASIGNADO"
+            teacherList = "NO ASIGNADO";
           }
   
           return {
@@ -116,7 +121,7 @@ const start = async () => {
         await browser.close();
   
         resolve(true);
-      }, 5000);
+      }, 2000);
     });
   } catch (error) {
     console.log(error);
