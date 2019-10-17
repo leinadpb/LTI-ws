@@ -16,6 +16,7 @@ const SubjectRouter = require('./routes/subjects_router.js');
 const UserRouter = require('./routes/user_router.js');
 const AuthRouter = require('./routes/auth_router.js');
 const CommonRouter = require('./routes/common_router.js');
+const AdvancedRouter = require('./routes/advanced_router.js');
 
 const app  = express();
 require('dotenv').config();
@@ -77,6 +78,7 @@ app.use('/api/v1/teachers', TeacherRouter);
 app.use('/api/v1/blacklist', BlacklistRotuer);
 app.use('/api/v1/subjects', SubjectRouter);
 app.use('/api/v1/common', CommonRouter);
+app.use('/api/v1/advanced', AdvancedRouter);
 
 let appPort = !!process.env.PORT ? process.env.PORT : 8700;
 app.listen(appPort, '0.0.0.0', () =>
