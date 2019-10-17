@@ -5,8 +5,14 @@ require('dotenv').config();
 
 const updateSignatures = async (req, res) => {
 
-  await SubjectScript.start();
-  res.status(200).json({success: true});
+  let resultBoolean = await SubjectScript.start();
+  console.log(resultBoolean);
+  if (resultBoolean) {
+    res.status(200).json({success: true});
+  } else {
+    res.status(200).json({success: false});
+  }
+  
 
   // if (!!req.query.key) {
   //   if(process.env.SECRET_KEY === req.query.key) {
