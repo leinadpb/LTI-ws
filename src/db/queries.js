@@ -1,107 +1,122 @@
-const ConfigModel = require('../models/config');
-const RuleModel = require('../models/rule');
-const TrimesterModel = require('../models/trimesters');
-const HistoryStudentModel = require('../models/historyStudent');
-const HistoryTeacherModel = require('../models/historyTecher');
-const BlackListModel = require('../models/blackList');
-const SubjectModel = require('../models/subject');
-const AppUserModel = require('../models/app_user');
-const mongoose = require('mongoose');
+const ConfigModel = require("../models/config");
+const RuleModel = require("../models/rule");
+const TrimesterModel = require("../models/trimesters");
+const HistoryStudentModel = require("../models/historyStudent");
+const HistoryTeacherModel = require("../models/historyTecher");
+const BlackListModel = require("../models/blackList");
+const SubjectModel = require("../models/subject");
+const AppUserModel = require("../models/app_user");
+const mongoose = require("mongoose");
 
-mongoose.set('useNewUrlParser', true);
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
+mongoose.set("useNewUrlParser", true);
+mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true);
 
 // CONFIGS
 const getConfigs = () => {
   return ConfigModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving configurations: ', err);
+      console.log("Error retreiving configurations: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
-const updateConfig = (config) => {
-  return ConfigModel.findOneAndUpdate({key: config.key}, config, (err, doc) => {
-    if (!!err) {
-      console.log('Error updating config: ', err);
-      return null;
+};
+const updateConfig = config => {
+  return ConfigModel.findOneAndUpdate(
+    { key: config.key },
+    config,
+    (err, doc) => {
+      if (!!err) {
+        console.log("Error updating config: ", err);
+        return null;
+      }
+      return doc;
     }
-    return doc;
-  }).lean();
-}
-const updatePreferences = async (preferences) => {
-  console.log('preferences >>', preferences);
-  for(let i= 0; i < preferences.length; i++) {
-    console.log('config >>', preferences[i]);
+  ).lean();
+};
+const updatePreferences = async preferences => {
+  console.log("preferences >>", preferences);
+  for (let i = 0; i < preferences.length; i++) {
+    console.log("config >>", preferences[i]);
     await updateConfig(preferences[i]);
   }
-}
+};
 
 // RULES
 const getRules = () => {
   return RuleModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving rules: ', err);
+      console.log("Error retreiving rules: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
-const updateRule = (rule) => {
-  return RuleModel.updateOne({number: rule.number}, rule, (err, doc) => {
+};
+const updateRule = rule => {
+  return RuleModel.updateOne({ number: rule.number }, rule, (err, doc) => {
     if (!!err) {
-      console.log('Error update rule: ', err);
+      console.log("Error update rule: ", err);
       return null;
     }
     return doc;
   });
-}
-const deleteRule = (rule) => {
-  return RuleModel.findOneAndDelete({number: rule.number}, (err) => {
+};
+const deleteRule = rule => {
+  return RuleModel.findOneAndDelete({ number: rule.number }, err => {
     if (!!err) {
-      console.log('Error deleting rule: ', err);
+      console.log("Error deleting rule: ", err);
       return null;
     }
   });
-}
-const addRule = (rule) => {
-  return RuleModel.create(rule, (err) => {
+};
+const addRule = rule => {
+  return RuleModel.create(rule, err => {
     if (!!err) {
-      console.log('Error addding rule: ', err);
+      console.log("Error addding rule: ", err);
       return null;
     }
   });
-}
-const updateRuleByText = (rule) => {
-  return RuleModel.updateOne({text: rule.text}, rule, (err, doc) => {
+};
+const updateRuleByText = rule => {
+  return RuleModel.updateOne({ text: rule.text }, rule, (err, doc) => {
     if (!!err) {
-      console.log('Error updating rule: ', err);
+      console.log("Error updating rule: ", err);
       return null;
     }
     return doc;
   });
-}
-const updateRulesNumbers = (rules) => {
+};
+const updateRulesNumbers = rules => {
   rules.forEach(async (rule, idx) => {
-    await updateRuleByText({text: rule.text, number: idx + 1});
-  })
-}
+    await updateRuleByText({ text: rule.text, number: idx + 1 });
+  });
+};
 
 // TRIMESTERS
 const getTrimesters = () => {
   return TrimesterModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving Trimesters: ', err);
+      console.log("Error retreiving Trimesters: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
-const determineTrimesterCustomId = (trimester) => {
-  const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+};
+const determineTrimesterCustomId = trimester => {
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
   ];
   let startDate = new Date(trimester.start);
   let endDate = new Date(trimester.ends);
@@ -109,280 +124,334 @@ const determineTrimesterCustomId = (trimester) => {
   let endMonth = monthNames[endDate.getMonth()];
   let finishYear = endDate.getFullYear();
   return `${startMonth[0].toUpperCase()}-${endMonth[0].toUpperCase()}-${finishYear}`;
-}
-const updateTrimester = (trimester) => {
+};
+const updateTrimester = trimester => {
   let sanitazed = {
     name: trimester.name,
     start: new Date(trimester.start),
     ends: new Date(trimester.ends),
     lastModified: new Date(),
-    customId: determineTrimesterCustomId(trimester),
+    customId: determineTrimesterCustomId(trimester)
   };
-  return TrimesterModel.updateOne({customId: trimester.customId}, sanitazed, (err, doc) => {
-    if (!!err) {
-      console.log('Error update trimester: ', err);
-      return null;
+  return TrimesterModel.updateOne(
+    { customId: trimester.customId },
+    sanitazed,
+    (err, doc) => {
+      if (!!err) {
+        console.log("Error update trimester: ", err);
+        return null;
+      }
+      return doc;
     }
-    return doc;
-  });
-}
-const addTrimester = (trimester) => {
+  );
+};
+const addTrimester = trimester => {
   let sanitazed = {
     name: trimester.name,
     start: new Date(trimester.start),
     ends: new Date(trimester.ends),
     lastModified: undefined,
-    customId: determineTrimesterCustomId(trimester),
+    customId: determineTrimesterCustomId(trimester)
   };
   return TrimesterModel.create(sanitazed, (err, doc) => {
     if (!!err) {
-      console.log('Error adding trimester: ', err);
+      console.log("Error adding trimester: ", err);
       return null;
     }
     return doc;
   });
-}
+};
 const getCurrentTrimester = () => {
   const todayDate = Date.now();
-  return TrimesterModel.find({
-    start: {
-      '$lte': todayDate
+  return TrimesterModel.find(
+    {
+      start: {
+        $lte: todayDate
+      },
+      ends: {
+        $gte: todayDate
+      }
     },
-    ends: {
-      '$gte': todayDate
+    (err, docs) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
     }
-  }, (err, docs) => {
-    if (err) {
-      console.error(err);
-      return;
-    }
-  }).lean();
-}
+  ).lean();
+};
 
 // History Students
 const getHistoryStudents = () => {
   return HistoryStudentModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving student: ', err);
+      console.log("Error retreiving student: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
-const getHistoryStudentsFiltered = (filterObject) => {
+};
+const getHistoryStudentsFiltered = filterObject => {
   let filter = {};
   if (filterObject.teacher) {
-    filter = {...filter, "teacher": { "$regex": filterObject.teacher, "$options": "i" } }
+    filter = {
+      ...filter,
+      teacher: { $regex: filterObject.teacher, $options: "i" }
+    };
   }
   if (filterObject.trimesterName) {
-    filter = {...filter, "trimesterName": { "$regex": filterObject.trimesterName, "$options": "i" } }
+    filter = {
+      ...filter,
+      trimesterName: { $regex: filterObject.trimesterName, $options: "i" }
+    };
   }
   if (filterObject.subject) {
-    filter = {...filter, "subject": { "$regex": filterObject.subject, "$options": "i" } }
+    filter = {
+      ...filter,
+      subject: { $regex: filterObject.subject, $options: "i" }
+    };
   }
   if (filterObject.trimesterId) {
-    filter = {...filter, "trimesterId": filterObject.trimesterId }
+    filter = { ...filter, trimesterId: filterObject.trimesterId };
   }
   if (filterObject.intecId) {
-    filter = {...filter, "intecId": { "$regex": filterObject.intecId, "$options": "i" } } 
+    filter = {
+      ...filter,
+      intecId: { $regex: filterObject.intecId, $options: "i" }
+    };
   }
   console.log(filter);
   return HistoryStudentModel.find(filter, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving student: ', err);
+      console.log("Error retreiving student: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
+};
 
-const getStudents = (intecId) => {
+const getStudents = intecId => {
   return HistoryStudentModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving student: ', err);
+      console.log("Error retreiving student: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
-const addStudent = (student) => {
+};
+const addStudent = student => {
   return HistoryStudentModel.create(student, (err, doc) => {
     if (!!err) {
-      console.log('Error creating student: ', err);
+      console.log("Error creating student: ", err);
       return null;
     }
     return doc;
   });
-}
+};
 const getStudentInCurrentTrimester = async (currentTrimester, userName) => {
   // TODO: Get student with createdAt date betwwen current trimester
-  const result = await HistoryStudentModel.find({
-    createdAt: {
-      '$gte': new Date(currentTrimester.start),
-      '$lte': new Date(currentTrimester.ends)
-    },
-    intecId: userName
-  }, (err, docs) => {
-    if (!!err) {
-      console.log('Error retreiving student: ', err);
-      return null;
-    }
-    return docs;
-  }).lean();
+  let result = [];
+  if (!!currentTrimester && !!userName) {
+    result = await HistoryStudentModel.find(
+      {
+        createdAt: {
+          $gte: new Date(currentTrimester.start),
+          $lte: new Date(currentTrimester.ends)
+        },
+        intecId: userName
+      },
+      (err, docs) => {
+        if (!!err) {
+          console.log("Error retreiving student: ", err);
+          return null;
+        }
+        return docs;
+      }
+    ).lean();
+  }
   return result;
-}
+};
 
 // History Teachers
-const getTeachers = (intecId) => {
+const getTeachers = intecId => {
   return HistoryTeacherModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving teacher: ', err);
+      console.log("Error retreiving teacher: ", err);
       return null;
     }
     return docs;
-  }).lean().exec();
-}
-const addTeacher = (teacher) => {
+  })
+    .lean()
+    .exec();
+};
+const addTeacher = teacher => {
   return HistoryTeacherModel.create(teacher, (err, doc) => {
     if (!!err) {
-      console.log('Error creating teacher: ', err);
+      console.log("Error creating teacher: ", err);
       return null;
     }
     return doc;
-  }).lean().exec();
-}
+  })
+    .lean()
+    .exec();
+};
 const getTeacherInCurrentTrimester = async (currentTrimester, userName) => {
   // TODO: Get student with createdAt date betwwen current trimester
-  const result = await HistoryTeacherModel.find({
-    createdAt: {
-      '$gte': new Date(currentTrimester.start),
-      '$lte': new Date(currentTrimester.ends)
+  const result = await HistoryTeacherModel.find(
+    {
+      createdAt: {
+        $gte: new Date(currentTrimester.start),
+        $lte: new Date(currentTrimester.ends)
+      },
+      intecId: userName
     },
-    intecId: userName
-  }, (err, docs) => {
-    if (!!err) {
-      console.log('Error retreiving student: ', err);
-      return null;
+    (err, docs) => {
+      if (!!err) {
+        console.log("Error retreiving student: ", err);
+        return null;
+      }
+      return docs;
     }
-    return docs;
-  }).lean();
+  ).lean();
   return result;
-}
+};
 
 // user common
 const updateSurveyStatus = (user, value) => {
   if (user.domain.toLowerCase() === "intec") {
-    return HistoryStudentModel.updateOne({intecId: user.intecId}, { hasFilledSurvey: value }, (err, doc) => {
-      if (!!err) {
-        console.log('Error creating teacher: ', err);
-        return null;
+    return HistoryStudentModel.updateOne(
+      { intecId: user.intecId },
+      { hasFilledSurvey: value },
+      (err, doc) => {
+        if (!!err) {
+          console.log("Error creating teacher: ", err);
+          return null;
+        }
+        return doc;
       }
-      return doc;
-    }).lean().exec();
-
+    )
+      .lean()
+      .exec();
   } else {
-    return HistoryTeacherModel.updateOne({intecId: user.intecId}, { hasFilledSurvey: value }, (err, doc) => {
-      if (!!err) {
-        console.log('Error creating teacher: ', err);
-        return null;
+    return HistoryTeacherModel.updateOne(
+      { intecId: user.intecId },
+      { hasFilledSurvey: value },
+      (err, doc) => {
+        if (!!err) {
+          console.log("Error creating teacher: ", err);
+          return null;
+        }
+        return doc;
       }
-      return doc;
-    }).lean().exec();
+    )
+      .lean()
+      .exec();
   }
-}
+};
 const getUser = (intecId, domain) => {
   if (domain.toLowerCase() === "intec") {
-    return HistoryStudentModel.findOne({intecId: intecId}, (err, doc) => {
+    return HistoryStudentModel.findOne({ intecId: intecId }, (err, doc) => {
       if (!!err) {
-        console.log('Error getting user with id: ', intecId, ' Error: ', err);
+        console.log("Error getting user with id: ", intecId, " Error: ", err);
         return;
       }
       return doc;
-    }).lean()
+    }).lean();
   } else {
-    return HistoryTeacherModel.findOne({intecId: intecId}, (err, doc) => {
+    return HistoryTeacherModel.findOne({ intecId: intecId }, (err, doc) => {
       if (!!err) {
-        console.log('Error getting user with id: ', intecId, ' Error: ', err);
+        console.log("Error getting user with id: ", intecId, " Error: ", err);
         return;
       }
       return doc;
-    }).lean()
+    }).lean();
   }
-}
+};
 
-const getAppUser = (email) => {
-  return AppUserModel.findOne({email: email}, (err, doc) => {
+const getAppUser = email => {
+  return AppUserModel.findOne({ email: email }, (err, doc) => {
     if (!!err) {
-      console.log('Error getting applciation user with email: ', email, ' Error: ', err);
+      console.log(
+        "Error getting applciation user with email: ",
+        email,
+        " Error: ",
+        err
+      );
       return;
     }
     return doc;
-  }).lean()
-}
+  }).lean();
+};
 
 // BlackList
 const getBlackListUsers = () => {
   return BlackListModel.find({}, (err, docs) => {
     if (!!err) {
-      console.log('Error retreiving admins: ', err);
+      console.log("Error retreiving admins: ", err);
       return null;
     }
     return docs;
   }).lean();
-}
-const addBlackListUser = (user) => {
-  return BlackListModel.create(user, (err) => {
+};
+const addBlackListUser = user => {
+  return BlackListModel.create(user, err => {
     if (!!err) {
-      console.log('Error adding admin: ', err);
+      console.log("Error adding admin: ", err);
       return null;
     }
   });
-}
-const deleteBlackListUser = (user) => {
-  return BlackListModel.findOneAndDelete({_id: mongoose.Types.ObjectId(user.mongoId)}, (err) => {
-    if (!!err) {
-      console.log('Error deleting admin: ', err);
-      return null;
+};
+const deleteBlackListUser = user => {
+  return BlackListModel.findOneAndDelete(
+    { _id: mongoose.Types.ObjectId(user.mongoId) },
+    err => {
+      if (!!err) {
+        console.log("Error deleting admin: ", err);
+        return null;
+      }
     }
-  });
-}
-const updateBlackListUser = (user) => {
-  return BlackListModel.findOneAndUpdate({_id: mongoose.Types.ObjectId(user.mongoId)}, {fullName: user.fullName, domain: user.domain, intecId: user.intecId}, (err) => {
-    if (!!err) {
-      console.log('Error updating admin: ', err);
-      return null;
+  );
+};
+const updateBlackListUser = user => {
+  return BlackListModel.findOneAndUpdate(
+    { _id: mongoose.Types.ObjectId(user.mongoId) },
+    { fullName: user.fullName, domain: user.domain, intecId: user.intecId },
+    err => {
+      if (!!err) {
+        console.log("Error updating admin: ", err);
+        return null;
+      }
+      console.log("u");
     }
-    console.log('u')
-  });
-}
-
+  );
+};
 
 const getSubjects = () => {
-  return SubjectModel.find({}, (err) => {
+  return SubjectModel.find({}, err => {
     if (!!err) {
-      console.log('Error retreiving Subjects: ', err);
+      console.log("Error retreiving Subjects: ", err);
       return null;
     }
-  }).lean()
-}
-const addSubjects = (subjects) => {
+  }).lean();
+};
+const addSubjects = subjects => {
   return SubjectModel.create(subjects, (err, doc) => {
     if (!!err) {
-      console.log('Error creating student: ', err);
+      console.log("Error creating student: ", err);
       return null;
     }
     return doc;
   });
-}
+};
 const removeAllSubjects = () => {
   return SubjectModel.deleteMany({}, (err, doc) => {
     if (!!err) {
-      console.log('Error creating student: ', err);
+      console.log("Error creating student: ", err);
       return null;
     }
     return doc;
   });
-}
+};
 
 module.exports = {
   getConfigs,
@@ -415,4 +484,4 @@ module.exports = {
   addSubjects,
   removeAllSubjects,
   getAppUser
-}
+};
