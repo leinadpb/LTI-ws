@@ -1,10 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-
-// models
-const UserModel = require('./models/app_user.js');
-
+const crypto = require('crypto');
+const helperSignatures = require('./helpers/signatures');
+const helperDecrypt = require('./helpers/encrypt_decrypt');
 // Routers imports
 const StudentRouter = require('./routes/student_router.js');
 const ConfigRouter = require('./routes/config_router.js');
@@ -18,7 +17,10 @@ const AuthRouter = require('./routes/auth_router.js');
 const CommonRouter = require('./routes/common_router.js');
 const AdvancedRouter = require('./routes/advanced_router.js');
 
-const app  = express();
+// INFO:
+// All clients trying to connect to this service must provide the CLIENT_KEY in the Bearer token athorization header for each request.
+
+const app = express();
 require('dotenv').config();
 
 // connect to DB
@@ -29,47 +31,39 @@ require('./db/seed.js');
 // constants
 const PUBLIC_ROUTES = ['/api/v1/auth/signin'];
 
+const loginClient = clientKey => {
+  // Verify digital signature
+  let decryptedClientKey = helperDecrypt.decrypt(clientKey);
+  let verifyResult = helperSignatures.verify(decryptedClientKey);
+  return verifyResult;
+};
+
 app.use(require('body-parser').json());
 app.use((req, res, next) => {
-  console.log('DEBUG >>>> ', req.path);
-  console.log('DEBUG >>> ', req.body);
-  console.log('DEBUG >>> ', req.query);
-  // console.log('BEDUB >>> auth token >>> ', req.headers.authorization);
+  console.log(req.path);
+  console.log('body: ', req.body);
+  console.log('query: ', req.query);
   if (PUBLIC_ROUTES.includes(req.path)) {
     next();
   } else {
     if (req.headers.authorization) {
       try {
-        const token = req.headers.authorization.split(" ")[1];
-        if (!!token) {
-          jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
-            error = false;
-            if (err) {
-              // return res.status(401).json({message: "Invalid signature. Please log in again or verify your access token."})
-              // FORCE is token is not valid.. Continue the request.... OMG!
-              console.log('FORCE !');
-              error = true;
-            }
-            if (!!payload && !error) {
-              UserModel.findById(payload.userId).then(doc => {
-                req.user = doc;
-                next();
-              });
-            } else {
-              next();
-            }
-          })
-          
+        const clientKey = req.headers.authorization.split(' ')[1];
+
+        if (loginClient(clientKey)) {
+          // Allow request
+          next();
         } else {
-          return res.status(401).json({message: "Please, provide your authorization token."})
+          // Deny request
+          console.log('Authentication failed. clientKey: ', clientKey);
+          return res.status(401).json({ message: 'Login Denied.' });
         }
-      } catch(e) {
-        console.log('ERROR: validation token: ', e);
-        return res.status(401).json({message: "Our fault, we couldn't validate your token."})
+      } catch (e) {
+        return res.status(500).json({ message: 'Unknown error.' });
       }
     } else {
-      console.log('ERROR: Sign in before continue: ', e);
-      return res.status(401).json({message: "You need to sign in before continue."})
+      console.log('Authorization token was not provided.');
+      return res.status(401).json({ message: 'Provide an authorization token.' });
     }
   }
 });
@@ -88,6 +82,4 @@ app.use('/api/v1/common', CommonRouter);
 app.use('/api/v1/advanced', AdvancedRouter);
 
 let appPort = !!process.env.PORT ? process.env.PORT : 8700;
-app.listen(appPort, '0.0.0.0', () =>
-  console.log(`App started at port: ${appPort}`)
-);
+app.listen(appPort, '0.0.0.0', () => console.log(`App started at port: ${appPort}`));
