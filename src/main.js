@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   console.log('DEBUG >>>> ', req.path);
   console.log('DEBUG >>> ', req.body);
   console.log('DEBUG >>> ', req.query);
-  console.log('BEDUB >>> auth token >>> ', req.headers.authorization);
+  // console.log('BEDUB >>> auth token >>> ', req.headers.authorization);
   if (PUBLIC_ROUTES.includes(req.path)) {
     next();
   } else {
@@ -43,10 +43,14 @@ app.use((req, res, next) => {
         const token = req.headers.authorization.split(" ")[1];
         if (!!token) {
           jwt.verify(token, process.env.JWT_SECRET, (err, payload) => {
+            error = false;
             if (err) {
-              return res.status(401).json({message: "Invalid signature. Please log in again or verify your access token."})
+              // return res.status(401).json({message: "Invalid signature. Please log in again or verify your access token."})
+              // FORCE is token is not valid.. Continue the request.... OMG!
+              console.log('FORCE !');
+              error = true;
             }
-            if (!!payload) {
+            if (!!payload && !error) {
               UserModel.findById(payload.userId).then(doc => {
                 req.user = doc;
                 next();
@@ -55,13 +59,16 @@ app.use((req, res, next) => {
               next();
             }
           })
+          
         } else {
           return res.status(401).json({message: "Please, provide your authorization token."})
         }
       } catch(e) {
+        console.log('ERROR: validation token: ', e);
         return res.status(401).json({message: "Our fault, we couldn't validate your token."})
       }
     } else {
+      console.log('ERROR: Sign in before continue: ', e);
       return res.status(401).json({message: "You need to sign in before continue."})
     }
   }

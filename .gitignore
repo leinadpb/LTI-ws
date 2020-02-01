@@ -4,3 +4,4 @@ node_modules
 .env
 yarn.lock
 yarn-error.lock
+dist/api.bundle.js
